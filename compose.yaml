@@ -3,11 +3,7 @@
 # hun servicenaam op het default netwerk, bv. mqtt://mosquitto:1883.
 #
 # Starten:  docker compose up -d node-red   ->  http://localhost:1881
-#
-# Eenmalig na een verse start (leeg volume): Menu -> Manage palette ->
-# Install -> @flowfuse/node-red-dashboard. Of via de CLI:
-#   docker compose exec node-red sh -c "cd /data && npm install @flowfuse/node-red-dashboard"
-#   docker compose restart node-red
+# Het FlowFuse Dashboard installeert zichzelf bij de eerste start.
 
 services:
   node-red:
@@ -20,6 +16,16 @@ services:
       TZ: Europe/Brussels
     volumes:
       - node_red_data:/data
+    # Installeert het dashboard in /data als het er nog niet is (enkel bij een
+    # leeg volume, vraagt dan internet), en start daarna Node-RED zoals normaal.
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        if [ ! -d /data/node_modules/@flowfuse/node-red-dashboard ]; then
+          (cd /data && npm install --no-audit --no-fund --no-update-notifier @flowfuse/node-red-dashboard)
+        fi
+        exec ./entrypoint.sh
 
 volumes:
   node_red_data:

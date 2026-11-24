@@ -1,0 +1,15 @@
+cat << 'EOF' >> .gitignore
+# Node-RED packages en lokale runtime-instellingen
+node-red-data/node_modules/
+node-red-data/.config*.json*
+node-red-data/.flows.json.backup
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS & Editor bestanden
+.DS_Store
+Thumbs.db
+.vscode/
+EOF

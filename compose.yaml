@@ -2,12 +2,14 @@
 # (mosquitto, influxdb, python-sensor) hieronder toe. Ze bereiken elkaar via
 # hun servicenaam op het default netwerk, bv. mqtt://mosquitto:1883.
 #
-# Starten:  docker compose up -d node-red   ->  http://localhost:1881
-# Het FlowFuse Dashboard installeert zichzelf bij de eerste start.
+# Starten:    docker compose up -d --build node-red
+# Editor:     http://localhost:1881
+# Dashboard:  http://localhost:1881/dashboard
 
 services:
   node-red:
-    image: ghcr.io/node-red/node-red:5.0.9
+    build: ./node-red
+    image: pdp-node-red:local
     restart: unless-stopped
     ports:
       # 1881 zodat je bestaande Node-RED op 1880 blijft werken
@@ -15,17 +17,9 @@ services:
     environment:
       TZ: Europe/Brussels
     volumes:
-      - node_red_data:/data
-    # Installeert het dashboard in /data als het er nog niet is (enkel bij een
-    # leeg volume, vraagt dan internet), en start daarna Node-RED zoals normaal.
-    entrypoint:
-      - /bin/bash
-      - -c
-      - |
-        if [ ! -d /data/node_modules/@flowfuse/node-red-dashboard ]; then
-          (cd /data && npm install --no-audit --no-fund --no-update-notifier @flowfuse/node-red-dashboard)
-        fi
-        exec ./entrypoint.sh
+      - node-red-data:/data
 
 volumes:
-  node_red_data:
+  # Flows en instellingen blijven bewaard bij herstarten/herbouwen.
+  # Het dashboard zit in de image, niet in dit volume.
+  node-red-data:

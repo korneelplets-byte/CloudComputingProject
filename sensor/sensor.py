@@ -12,11 +12,19 @@ client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 
 while True:
     # Genereer random sensorwaarden
-    payload = {
-        "temperatuur": round(random.uniform(18.0, 26.0), 1),
-        "luchtvochtigheid": round(random.uniform(35.0, 75.0), 1),
-        "co2": random.randint(400, 1200)
-    }
+    randominterval = random.randint(1,10)
+    if randominterval == 8:
+        payload = {
+                "temperatuur": round(random.uniform(18.0, 100.0), 1),
+                "luchtvochtigheid": round(random.uniform(35.0, 200.0), 1),
+                "co2": random.randint(400, 2000)
+            }
+    else:
+        payload = {
+            "temperatuur": round(random.uniform(18.0, 26.0), 1),
+            "luchtvochtigheid": round(random.uniform(35.0, 75.0), 1),
+            "co2": random.randint(400, 1200)
+        }
     bericht = json.dumps(payload)
 
     try:

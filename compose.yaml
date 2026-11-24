@@ -1,14 +1,19 @@
+# Starten:  docker compose up -d
+# Node-RED: http://localhost:1881
+
 services:
   node-red:
-    build: ./node-red
-    image: pdp-node-red:local
+    image: ghcr.io/node-red/node-red:5.0.9
     restart: unless-stopped
     ports:
+      # 1881 zodat je bestaande Node-RED op 1880 blijft werken
       - "127.0.0.1:1881:1880"
     environment:
       TZ: Europe/Brussels
     volumes:
-      - node_red_data:/data
+      - ./node-red-data:/data
+    # Installeert het dashboard in /data als het er nog niet is (enkel bij een
+    # leeg volume, vraagt dan internet), en start daarna Node-RED zoals normaal.
     entrypoint:
       - /bin/bash
       - -c
@@ -43,6 +48,5 @@ services:
       sh -c "pip install --no-cache-dir paho-mqtt && python -u sensor.py"
 
 volumes:
-  node_red_data:
   mosquitto_data:
   mosquitto_log:

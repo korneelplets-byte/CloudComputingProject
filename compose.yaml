@@ -1,23 +1,13 @@
-# Voorlopig enkel de Node-RED service. Teamgenoten voegen hun eigen services
-# (mosquitto, influxdb, python-sensor) hieronder toe. Ze bereiken elkaar via
-# hun servicenaam op het default netwerk, bv. mqtt://mosquitto:1883.
-#
-# Starten:  docker compose up -d node-red   ->  http://localhost:1881
-# Het FlowFuse Dashboard installeert zichzelf bij de eerste start.
-
 services:
   node-red:
     image: ghcr.io/node-red/node-red:5.0.9
     restart: unless-stopped
     ports:
-      # 1881 zodat je bestaande Node-RED op 1880 blijft werken
       - "127.0.0.1:1881:1880"
     environment:
       TZ: Europe/Brussels
     volumes:
       - node_red_data:/data
-    # Installeert het dashboard in /data als het er nog niet is (enkel bij een
-    # leeg volume, vraagt dan internet), en start daarna Node-RED zoals normaal.
     entrypoint:
       - /bin/bash
       - -c
@@ -27,5 +17,31 @@ services:
         fi
         exec ./entrypoint.sh
 
+  mosquitto:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+
+  python-sensor:
+    image: python:3.12-slim
+    restart: unless-stopped
+    working_dir: /app
+    depends_on:
+      - mosquitto
+    environment:
+      TZ: Europe/Brussels
+      MQTT_BROKER: mosquitto
+      MQTT_PORT: 1883
+      MQTT_TOPIC: sensors/ruimte1
+    volumes:
+      - ./sensor:/app
+    command: >
+      sh -c "pip install --no-cache-dir paho-mqtt && python -u sensor.py"
+
 volumes:
   node_red_data:
+  mosquitto_data:
+  mosquitto_log:
